@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Wedding Countdown & Fireworks</title>
+    <!-- Google Fonts for fancy heading and clean text -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* Reset and basic styling */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+        font-family: "Montserrat", sans-serif;
+        overflow: hidden;
+        /* Eye-catching gradient background */
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      }
+
+      /* Fireworks Canvas */
+      #fireworksCanvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+      /* Centered container for the heading & countdown */
+      #header {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        z-index: 10; /* Above the fireworks */
+      }
+
+      /* Neon-style wedding title */
+      #header h1 {
+        font-family: "Great Vibes", cursive;
+        font-size: 4em;
+        margin-bottom: 0.3em;
+        color: #fff;
+        /* Neon glow effect */
+        text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #ff0043,
+          0 0 30px #ff0043, 0 0 40px #ff0043, 0 0 50px #ff0043, 0 0 60px #ff0043;
+      }
+
+      /* Countdown text styling */
+      #header #countdown {
+        font-size: 2em;
+        color: #fff;
+        text-shadow: 0 0 2px #fff, 0 0 5px #fff, 0 0 10px #14fc56;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Fireworks Canvas -->
+    <canvas id="fireworksCanvas"></canvas>
+
+    <!-- Centered Header & Countdown -->
+    <div id="header">
+      <h1>Wedding Countdown</h1>
+      <div id="countdown"></div>
+    </div>
+
+    <script>
+      /* ------------------ Countdown Timer ------------------ */
+      const countdownElement = document.getElementById("countdown");
+      // Set target date: February 25, 2025
+      const targetDate = new Date("Feb 25, 2025 00:00:00").getTime();
+
+      function updateCountdown() {
+        const now = new Date().getTime();
+        const distance = targetDate - now;
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+
+        if (distance < 0) {
+          countdownElement.innerHTML = "The day has arrived!";
+          clearInterval(countdownInterval);
+        } else {
+          countdownElement.innerHTML = days + " Days Remaining";
+        }
+      }
+      updateCountdown();
+      const countdownInterval = setInterval(updateCountdown, 1000);
+
+      /* ------------------ Fireworks with Rocket Approach ------------------ */
+      const canvas = document.getElementById("fireworksCanvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      window.addEventListener("resize", () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+
+      // Particle for rocket trails & explosions
+      class Particle {
+        constructor(x, y, color, angle, speed, decay, size, gravity = 0) {
+          this.x = x;
+          this.y = y;
+          this.color = color;
+          this.angle = angle;
+          this.speed = speed;
+          this.decay = decay;
+          this.size = size;
+          this.alpha = 1;
+          this.gravity = gravity;
+        }
+        update() {
+          this.x += Math.cos(this.angle) * this.speed;
+          this.y += Math.sin(this.angle) * this.speed + this.gravity;
+          this.speed *= 0.98; // slow down slightly
+          this.alpha -= this.decay;
+        }
+        draw(ctx) {
+          ctx.save();
+          ctx.globalAlpha = this.alpha;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
+          ctx.fillStyle = this.color;
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      // Firework explosion class
+      class Explosion {
+        constructor(x, y, color) {
+          this.particles = [];
+          this.init(x, y, color);
+        }
+        init(x, y, color) {
+          const particleCount = 100 + Math.random() * 50;
+          for (let i = 0; i < particleCount; i++) {
+            const angle = Math.random() * 2 * Math.PI;
+            const speed = Math.random() * 4 + 2;
+            const decay = Math.random() * 0.02 + 0.01;
+            const size = Math.random() * 2 + 1;
+            // Slightly randomize color or pick from a palette
+            this.particles.push(
+              new Particle(
+                x,
+                y,
+                color,
+                angle,
+                speed,
+                decay,
+                size,
+                0.03 // a bit of gravity
+              )
+            );
+          }
+        }
+        update() {
+          this.particles.forEach((p) => p.update());
+          // filter out dead particles
+          this.particles = this.particles.filter((p) => p.alpha > 0);
+        }
+        draw(ctx) {
+          this.particles.forEach((p) => p.draw(ctx));
+        }
+        get done() {
+          return this.particles.length === 0;
+        }
+      }
+
+      // Rocket class: ascends from bottom, then explodes
+      class Rocket {
+        constructor(x, targetY) {
+          this.x = x;
+          this.y = canvas.height;
+          this.targetY = targetY;
+          // random color from a palette
+          const colors = [
+            "#ff0043",
+            "#14fc56",
+            "#1e90ff",
+            "#fffb00",
+            "#ffffff",
+            "#ff69b4",
+          ];
+          this.color = colors[Math.floor(Math.random() * colors.length)];
+
+          this.speed = Math.random() * 2 + 4; // upward speed
+          this.angle = -Math.PI / 2; // straight up
+          this.alpha = 1;
+          this.trail = []; // store Particle objects for trailing sparks
+          this.exploded = false;
+        }
+
+        update() {
+          // Create a spark in the rocket's trail
+          const trailParticle = new Particle(
+            this.x,
+            this.y,
+            this.color,
+            Math.random() * 2 * Math.PI,
+            Math.random() * 0.5,
+            0.02,
+            Math.random() * 2 + 1
+          );
+          this.trail.push(trailParticle);
+
+          // Remove old trail sparks
+          this.trail = this.trail.filter((p) => p.alpha > 0);
+
+          // Move rocket up
+          this.y -= this.speed;
+
+          // If reached target, explode
+          if (this.y <= this.targetY) {
+            this.exploded = true;
+          }
+
+          // Update each trail spark
+          this.trail.forEach((p) => p.update());
+        }
+
+        draw(ctx) {
+          // Draw each spark in the trail
+          this.trail.forEach((p) => p.draw(ctx));
+
+          // Draw rocket head (small bright circle)
+          ctx.save();
+          ctx.beginPath();
+          ctx.fillStyle = this.color;
+          ctx.arc(this.x, this.y, 3, 0, 2 * Math.PI);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      // Arrays to hold rockets & explosions
+      let rockets = [];
+      let explosions = [];
+
+      // Launch a rocket at a random horizontal position with a random targetY in upper half
+      function launchRocket() {
+        const x = Math.random() * canvas.width;
+        const targetY = 50 + Math.random() * (canvas.height / 2 - 50);
+        rockets.push(new Rocket(x, targetY));
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Update & draw rockets
+        rockets.forEach((rocket, rIndex) => {
+          rocket.update();
+          rocket.draw(ctx);
+
+          // If rocket exploded, create an Explosion & remove the rocket
+          if (rocket.exploded) {
+            explosions.push(new Explosion(rocket.x, rocket.y, rocket.color));
+            rockets.splice(rIndex, 1);
+          }
+        });
+
+        // Update & draw explosions
+        explosions.forEach((explosion, eIndex) => {
+          explosion.update();
+          explosion.draw(ctx);
+          // remove finished explosions
+          if (explosion.done) {
+            explosions.splice(eIndex, 1);
+          }
+        });
+
+        requestAnimationFrame(animate);
+      }
+
+      // Start the show
+      animate();
+      // Launch rockets at intervals
+      setInterval(launchRocket, 800);
+    </script>
+  </body>
+</html>

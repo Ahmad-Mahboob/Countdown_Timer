@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Wedding Countdown & Fireworks</title>
+    <style>
+      /* Basic reset and background */
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        height: 100%;
+        background: #000;
+        font-family: "Arial", sans-serif;
+      }
+      /* Countdown text styling */
+      #countdown {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        font-size: 2.5em;
+        color: #fff;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+      }
+      /* Canvas fills the window */
+      #fireworksCanvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Countdown timer container -->
+    <div id="countdown"></div>
+    <!-- Canvas for fireworks animation -->
+    <canvas id="fireworksCanvas"></canvas>
+
+    <script>
+      /* ------------------ Countdown Timer ------------------ */
+      const countdownElement = document.getElementById("countdown");
+      // Target date: February 25, 2025 at midnight
+      const targetDate = new Date("Feb 25, 2025 00:00:00").getTime();
+
+      function updateCountdown() {
+        const now = new Date().getTime();
+        const distance = targetDate - now;
+        // Calculate remaining days
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        // Display the countdown
+        countdownElement.innerHTML = days + " Days Remaining";
+        // When the countdown is done, display a message
+        if (distance < 0) {
+          countdownElement.innerHTML = "The day has arrived!";
+          clearInterval(countdownInterval);
+        }
+      }
+
+      updateCountdown();
+      const countdownInterval = setInterval(updateCountdown, 1000);
+
+      /* ------------------ Fireworks Animation ------------------ */
+      const canvas = document.getElementById("fireworksCanvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      // Update canvas size on window resize
+      window.addEventListener("resize", () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+
+      // Particle class to simulate firework fragments
+      class Particle {
+        constructor(x, y, color, angle, speed, decay) {
+          this.x = x;
+          this.y = y;
+          this.color = color;
+          this.angle = angle;
+          this.speed = speed;
+          this.alpha = 1;
+          this.decay = decay;
+          this.gravity = 0.05;
+        }
+        update() {
+          // Update particle position using polar coordinates
+          this.x += Math.cos(this.angle) * this.speed;
+          this.y += Math.sin(this.angle) * this.speed + this.gravity;
+          // Fade out the particle gradually
+          this.alpha -= this.decay;
+        }
+        draw(ctx) {
+          ctx.save();
+          ctx.globalAlpha = this.alpha;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+          ctx.fillStyle = this.color;
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      // Firework class to handle a burst of particles
+      class Firework {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+          this.particles = [];
+          this.createParticles();
+        }
+        createParticles() {
+          const particleCount = 100;
+          // A palette of vibrant colors for a wedding feel
+          const colors = [
+            "#ff0043",
+            "#14fc56",
+            "#1e90ff",
+            "#fffb00",
+            "#ffffff",
+          ];
+          const color = colors[Math.floor(Math.random() * colors.length)];
+          for (let i = 0; i < particleCount; i++) {
+            const angle = Math.PI * 2 * (i / particleCount);
+            const speed = Math.random() * 3 + 2;
+            const decay = Math.random() * 0.015 + 0.015;
+            this.particles.push(
+              new Particle(this.x, this.y, color, angle, speed, decay)
+            );
+          }
+        }
+        update() {
+          // Update each particle and remove it when fully faded
+          this.particles.forEach((particle) => particle.update());
+          this.particles = this.particles.filter((p) => p.alpha > 0);
+        }
+        draw(ctx) {
+          this.particles.forEach((particle) => particle.draw(ctx));
+        }
+      }
+
+      let fireworks = [];
+
+      // Function to launch a firework at a random position (upper half)
+      function launchFirework() {
+        const x = Math.random() * canvas.width;
+        const y = (Math.random() * canvas.height) / 2;
+        fireworks.push(new Firework(x, y));
+      }
+
+      // Main animation loop using requestAnimationFrame
+      function animate() {
+        // Create a trailing effect with semi-transparent fill
+        ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Update and draw each firework
+        fireworks.forEach((firework, index) => {
+          firework.update();
+          firework.draw(ctx);
+          // Remove fireworks that have finished
+          if (firework.particles.length === 0) {
+            fireworks.splice(index, 1);
+          }
+        });
+        requestAnimationFrame(animate);
+      }
+      animate();
+      // Launch fireworks periodically
+      setInterval(launchFirework, 800);
+    </script>
+  </body>
+</html>

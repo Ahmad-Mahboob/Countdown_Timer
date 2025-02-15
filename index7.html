@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Luxury Wedding Countdown</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        background: linear-gradient(45deg, #0a0a2e, #1a1a4f);
+        overflow: hidden;
+        font-family: "Arial", sans-serif;
+      }
+
+      .container {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        color: #fff;
+        padding: 5% 20px;
+        backdrop-filter: blur(2px);
+      }
+
+      /* Main heading with neon styling */
+      .title {
+        font-family: "Great Vibes", cursive;
+        font-size: 4em;
+        margin-bottom: 30px;
+        color: #ff00ff; /* Neon Magenta */
+        text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 15px #ff00ff,
+          0 0 20px #ff00ff;
+        animation: float 3s ease-in-out infinite;
+      }
+
+      .countdown {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 40px;
+        margin-top: 50px;
+      }
+
+      .countdown-item {
+        padding: 30px;
+        border-radius: 15px;
+        min-width: 180px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+      }
+
+      /* Different background colors for each countdown box */
+      .days-item {
+        background: rgba(0, 29, 255, 0.2); /* Neon blue tint */
+      }
+      .hours-item {
+        background: rgba(57, 255, 20, 0.2); /* Neon green tint */
+      }
+      .minutes-item {
+        background: rgba(255, 110, 199, 0.2); /* Neon pink tint */
+      }
+      .seconds-item {
+        background: rgba(191, 0, 255, 0.2); /* Neon purple tint */
+      }
+
+      .number {
+        font-size: 3.5em;
+        font-weight: bold;
+        text-shadow: 0 0 15px;
+      }
+
+      /* Unique neon colors for each digit */
+      #days {
+        color: #00e5ff; /* Neon cyan */
+        text-shadow: 0 0 15px #00e5ff, 0 0 30px #00e5ff;
+      }
+      #hours {
+        color: #39ff14; /* Neon green */
+        text-shadow: 0 0 15px #39ff14, 0 0 30px #39ff14;
+      }
+      #minutes {
+        color: #ff6ec7; /* Neon pink */
+        text-shadow: 0 0 15px #ff6ec7, 0 0 30px #ff6ec7;
+      }
+      #seconds {
+        color: #bf00ff; /* Neon purple */
+        text-shadow: 0 0 15px #bf00ff, 0 0 30px #bf00ff;
+      }
+
+      .label {
+        font-size: 1.2em;
+        color: #fff;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+
+      /* Extra texts ("Only:" and "Left") with neon styling */
+      .extra-text {
+        font-size: 2em;
+        color: #00ffff; /* Neon cyan */
+        text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff, 0 0 15px #00ffff;
+        margin: 0 10px;
+      }
+
+      /* Fireworks Styles */
+      .firework {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        animation: explode 1.5s ease-out forwards;
+      }
+
+      .particle {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        animation: particle 1.5s ease-out forwards;
+      }
+
+      @keyframes explode {
+        0% {
+          transform: scale(0);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(12);
+          opacity: 0;
+        }
+      }
+
+      @keyframes particle {
+        0% {
+          transform: translate(0, 0) scale(1);
+          opacity: 1;
+        }
+        100% {
+          transform: translate(var(--tx), var(--ty)) scale(0);
+          opacity: 0;
+        }
+      }
+
+      .sparkle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        animation: sparkle 1s linear infinite;
+      }
+
+      @keyframes sparkle {
+        0% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1.5);
+          opacity: 0.5;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-20px);
+        }
+      }
+
+      .glow {
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        background: radial-gradient(
+          circle,
+          rgba(255, 215, 0, 0.1) 0%,
+          rgba(0, 0, 0, 0) 70%
+        );
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="glow"></div>
+    <div class="container">
+      <h1 class="title">Wedding Countdown</h1>
+      <div class="countdown">
+        <!-- Only -->
+        <div class="extra-text">Only:</div>
+        <div class="countdown-item days-item">
+          <div class="number" id="days">00</div>
+          <div class="label">Days</div>
+        </div>
+        <div class="countdown-item hours-item">
+          <div class="number" id="hours">00</div>
+          <div class="label">Hours</div>
+        </div>
+        <div class="countdown-item minutes-item">
+          <div class="number" id="minutes">00</div>
+          <div class="label">Minutes</div>
+        </div>
+        <div class="countdown-item seconds-item">
+          <div class="number" id="seconds">00</div>
+          <div class="label">Seconds</div>
+        </div>
+        <div class="extra-text">Left</div>
+        <!-- Only -->
+      </div>
+    </div>
+
+    <script>
+      // Enhanced Fireworks System with improved neon effects
+      class Firework {
+        constructor() {
+          // Brighter neon colors for fireworks
+          this.colors = ["#ff00ff", "#00ff00", "#00ffff", "#ffff00", "#ff4500"];
+          this.createFirework();
+        }
+
+        createFirework() {
+          const x = Math.random() * window.innerWidth;
+          const y = Math.random() * window.innerHeight;
+          this.createExplosion(x, y);
+        }
+
+        createExplosion(x, y) {
+          const particles = 40; // Increased particle count for a grander effect
+          const mainColor =
+            this.colors[Math.floor(Math.random() * this.colors.length)];
+
+          // Create main explosion with neon glow
+          const explosion = document.createElement("div");
+          explosion.className = "firework";
+          explosion.style.background = mainColor;
+          explosion.style.boxShadow = `0 0 20px ${mainColor}`;
+          explosion.style.left = `${x}px`;
+          explosion.style.top = `${y}px`;
+          document.body.appendChild(explosion);
+
+          // Create particles with neon glow
+          for (let i = 0; i < particles; i++) {
+            const angle = (Math.PI * 2 * i) / particles;
+            const velocity = 2 + Math.random() * 4;
+            const tx = Math.cos(angle) * 100 * velocity;
+            const ty = Math.sin(angle) * 100 * velocity;
+
+            const particle = document.createElement("div");
+            particle.className = "particle";
+            const particleColor =
+              this.colors[Math.floor(Math.random() * this.colors.length)];
+            particle.style.background = particleColor;
+            particle.style.boxShadow = `0 0 15px ${particleColor}`;
+            particle.style.left = `${x}px`;
+            particle.style.top = `${y}px`;
+            particle.style.setProperty("--tx", `${tx}px`);
+            particle.style.setProperty("--ty", `${ty}px`);
+            document.body.appendChild(particle);
+
+            // Add sparkles with neon glow
+            if (Math.random() > 0.7) {
+              const sparkle = document.createElement("div");
+              sparkle.className = "sparkle";
+              sparkle.style.background = mainColor;
+              sparkle.style.boxShadow = `0 0 10px ${mainColor}`;
+              sparkle.style.left = `${x + tx / 10}px`;
+              sparkle.style.top = `${y + ty / 10}px`;
+              document.body.appendChild(sparkle);
+              setTimeout(() => sparkle.remove(), 1000);
+            }
+          }
+
+          // Cleanup fireworks after explosion
+          setTimeout(() => {
+            explosion.remove();
+            document.querySelectorAll(".particle").forEach((p) => p.remove());
+          }, 1500);
+        }
+      }
+
+      // Create periodic fireworks
+      setInterval(() => new Firework(), 800);
+      document.addEventListener(
+        "click",
+        (e) => new Firework(e.clientX, e.clientY)
+      );
+
+      // Countdown Timer
+      const targetDate = new Date("2025-02-25T00:00:00");
+      const elements = {
+        days: document.getElementById("days"),
+        hours: document.getElementById("hours"),
+        minutes: document.getElementById("minutes"),
+        seconds: document.getElementById("seconds"),
+      };
+
+      function updateTimer() {
+        const now = new Date();
+        const diff = targetDate - now;
+
+        if (diff <= 0) {
+          document.querySelector(".container").innerHTML = `
+            <h1 class="title">We Are One</h1>
+            <div class="celebrate">🎉💍🎊</div>
+          `;
+          setInterval(() => new Firework(), 100);
+          return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor(
+          (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        );
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        elements.days.textContent = days.toString().padStart(2, "0");
+        elements.hours.textContent = hours.toString().padStart(2, "0");
+        elements.minutes.textContent = minutes.toString().padStart(2, "0");
+        elements.seconds.textContent = seconds.toString().padStart(2, "0");
+      }
+
+      updateTimer();
+      setInterval(updateTimer, 1000);
+
+      // Add initial fireworks burst
+      setTimeout(() => {
+        for (let i = 0; i < 20; i++) {
+          setTimeout(() => new Firework(), i * 50);
+        }
+      }, 1000);
+    </script>
+  </body>
+</html>
